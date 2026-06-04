@@ -27,6 +27,14 @@ public class ArbolBinarioBusqueda {
         return raiz;
     }
 
+    /**
+     * Permite inyectar una raiz personalizada (acceso de paquete).
+     * Usado en pruebas para construir arboles "rotos" y validar esBSTValido().
+     */
+    void setRaiz(Nodo raiz) {
+        this.raiz = raiz;
+    }
+
     public boolean estaVacio() {
         return raiz == null;
     }
@@ -194,6 +202,158 @@ public class ArbolBinarioBusqueda {
             return 1;
         }
         return contarHojasRecursivo(nodo.izquierdo) + contarHojasRecursivo(nodo.derecho);
+    }
+
+    // ============================================================
+    // PROBLEMA 1: Contar nodos recursivamente (sin usar 'tamanio')
+    // ============================================================
+
+    /**
+     * Devuelve la cantidad total de nodos del arbol usando recursividad.
+     * NO usa el campo 'tamanio'.
+     * Caso base: nodo null -> 0 nodos.
+     * Caso recursivo: 1 (nodo actual) + nodos del subarbol izq + nodos del subarbol der.
+     */
+    public int contarNodos() {
+        return contarNodosRecursivo(raiz);
+    }
+
+    private int contarNodosRecursivo(Nodo nodo) {
+        if (nodo == null) {
+            return 0;
+        }
+        return 1 + contarNodosRecursivo(nodo.izquierdo) + contarNodosRecursivo(nodo.derecho);
+    }
+
+    // ============================================================
+    // PROBLEMA 2: ¿Está balanceado?
+    // ============================================================
+
+    /**
+     * Indica si el arbol esta balanceado en altura.
+     * Un arbol esta balanceado si, para CADA nodo, la diferencia
+     * de altura entre su subarbol izquierdo y derecho es <= 1.
+     *
+     * Estrategia: calcular la altura verificando el balance al mismo
+     * tiempo. Si en cualquier nodo el arbol no esta balanceado,
+     * se retorna -2 como sentinel para propagar el fallo.
+     */
+    public boolean esBalanceado() {
+        return alturaBalanceada(raiz) != -2;
+    }
+
+    /**
+     * Devuelve la altura del subarbol si esta balanceado,
+     * o -2 como sentinel si NO lo esta.
+     */
+    private int alturaBalanceada(Nodo nodo) {
+        if (nodo == null) {
+            return -1;
+        }
+        int alturaIzq = alturaBalanceada(nodo.izquierdo);
+        if (alturaIzq == -2) {
+            return -2; // propagar fallo
+        }
+        int alturaDer = alturaBalanceada(nodo.derecho);
+        if (alturaDer == -2) {
+            return -2; // propagar fallo
+        }
+        int diferencia = alturaIzq - alturaDer;
+        if (diferencia > 1 || diferencia < -1) {
+            return -2; // no balanceado en este nodo
+        }
+        return 1 + (alturaIzq > alturaDer ? alturaIzq : alturaDer);
+    }
+
+    // ============================================================
+    // PROBLEMA 3: Validar que sea un BST
+    // ============================================================
+
+    /**
+     * Verifica que el arbol cumple la propiedad de BST en todos sus nodos.
+     * Estrategia: pasar rango (min, max) permitido en cada llamada recursiva.
+     * Se usan Integer.MIN_VALUE e Integer.MAX_VALUE como limites iniciales.
+     */
+    public boolean esBSTValido() {
+        return esBSTValidoRecursivo(raiz, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+
+    private boolean esBSTValidoRecursivo(Nodo nodo, int min, int max) {
+        if (nodo == null) {
+            return true; // un arbol vacio o hoja alcanzada es valido
+        }
+        if (nodo.dato <= min || nodo.dato >= max) {
+            return false; // viola la propiedad del BST
+        }
+        // El subarbol izquierdo debe tener valores en (min, nodo.dato)
+        // El subarbol derecho debe tener valores en (nodo.dato, max)
+        return esBSTValidoRecursivo(nodo.izquierdo, min, nodo.dato)
+            && esBSTValidoRecursivo(nodo.derecho, nodo.dato, max);
+    }
+
+    // ============================================================
+    // PROBLEMA 4: Ancestro Común Más Bajo (LCA)
+    // ============================================================
+
+    /**
+     * Devuelve el dato del nodo que es el Ancestro Comun Mas Bajo (LCA)
+     * de los valores 'a' y 'b'.
+     *
+     * Algoritmo aprovecha la propiedad del BST:
+     *  - Si ambos valores son menores que el nodo actual -> ir a la izquierda.
+     *  - Si ambos valores son mayores que el nodo actual -> ir a la derecha.
+     *  - En caso contrario (uno a cada lado, o uno igual al nodo) -> LCA encontrado.
+     *
+     * @throws IllegalArgumentException si 'a' o 'b' no existen en el arbol.
+     */
+    public int ancestroComunMasBajo(int a, int b) {
+        if (!contiene(a)) {
+            throw new IllegalArgumentException("El valor " + a + " no existe en el arbol.");
+        }
+        if (!contiene(b)) {
+            throw new IllegalArgumentException("El valor " + b + " no existe en el arbol.");
+        }
+        return lcaRecursivo(raiz, a, b);
+    }
+
+    private int lcaRecursivo(Nodo nodo, int a, int b) {
+        if (nodo == null) {
+            throw new IllegalStateException("No se encontro el LCA (arbol inconsistente).");
+        }
+        if (a < nodo.dato && b < nodo.dato) {
+            return lcaRecursivo(nodo.izquierdo, a, b);
+        }
+        if (a > nodo.dato && b > nodo.dato) {
+            return lcaRecursivo(nodo.derecho, a, b);
+        }
+        // Uno a cada lado (o uno de ellos ES el nodo actual) -> este es el LCA
+        return nodo.dato;
+    }
+
+    // ============================================================
+    // PROBLEMA 5: Invertir (espejo del arbol)
+    // ============================================================
+
+    /**
+     * Invierte el arbol intercambiando el hijo izquierdo y derecho
+     * en TODOS los nodos (reflejo / espejo).
+     * Despues de invertir, el inOrden estara en orden DESCENDENTE.
+     */
+    public void invertir() {
+        invertirRecursivo(raiz);
+    }
+
+    private void invertirRecursivo(Nodo nodo) {
+        if (nodo == null) {
+            return;
+        }
+        // Intercambiar hijos
+        Nodo temporal = nodo.izquierdo;
+        nodo.izquierdo = nodo.derecho;
+        nodo.derecho = temporal;
+        // Invertir recursivamente ambos subarboles
+        invertirRecursivo(nodo.izquierdo);
+        invertirRecursivo(nodo.derecho);
     }
 
     // ============================================================
