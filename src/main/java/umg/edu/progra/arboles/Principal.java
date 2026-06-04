@@ -5,8 +5,11 @@ package umg.edu.progra.arboles;
  * implementado manualmente, sin usar librerias como java.util.
  *
  * Ejecucion sugerida:
- *   1. mvn compile
- *   2. mvn exec:java -Dexec.mainClass="umg.edu.progra.arboles.Principal"
+ *   mvn compile
+ *   java -cp target/classes umg.edu.progra.arboles.Principal
+ *
+ * Para el Ejercicio Extra E4 con argumentos de linea de comandos:
+ *   java -cp target/classes umg.edu.progra.arboles.Principal 15 9 25 4 12 20 30
  *
  * @author Walter Cordova
  */
@@ -14,11 +17,12 @@ public class Principal {
 
     public static void main(String[] args) {
 
+        // ========================================================
+        // DEMO BASE: arbol del enunciado
+        // ========================================================
         ArbolBinarioBusqueda arbol = new ArbolBinarioBusqueda();
 
         /*
-         * Insertamos estos valores para formar el siguiente BST:
-         *
          *               50
          *              /  \
          *            30    70
@@ -80,18 +84,150 @@ public class Principal {
         System.out.println("Tamanio final: " + arbol.tamanio());
         System.out.println("Altura final:  " + arbol.altura());
 
-        /*
-         * Ejercicios
-         *
-         *  1. Implementar un metodo que devuelva la cantidad TOTAL de nodos
-         *     usando recursividad (sin usar el campo 'tamanio').
-         *  2. Implementar un metodo 'esBalanceado()' que indique si el arbol
-         *     esta balanceado (diferencia de alturas <= 1 en cada nodo).
-         *  3. Implementar 'esBSTValido()' que verifique que el arbol cumple
-         *     la propiedad de BST recorriendo los nodos.
-         *  4. Implementar un metodo para encontrar el ancestro comun mas
-         *     bajo (LCA) entre dos valores.
-         *  5. Implementar la inversion del arbol (espejo).
-         */
+        // ========================================================
+        // PROBLEMA 1: contarNodos recursivamente
+        // ========================================================
+        System.out.println("\n========================================");
+        System.out.println("PROBLEMA 1 — contarNodos recursivo");
+        System.out.println("========================================");
+
+        ArbolBinarioBusqueda arbol1 = new ArbolBinarioBusqueda();
+        int[] v1 = { 50, 30, 70, 20, 40, 60, 80, 10 };
+        for (int v : v1) arbol1.insertar(v);
+
+        System.out.println("Arbol con 8 nodos:");
+        System.out.println("  tamanio()    = " + arbol1.tamanio());
+        System.out.println("  contarNodos()= " + arbol1.contarNodos());
+        System.out.println("  Coinciden?   " + (arbol1.tamanio() == arbol1.contarNodos()));
+
+        arbol1.insertar(5);
+        arbol1.insertar(90);
+        System.out.println("Tras insertar 5 y 90 (10 nodos):");
+        System.out.println("  tamanio()    = " + arbol1.tamanio());
+        System.out.println("  contarNodos()= " + arbol1.contarNodos());
+        System.out.println("  Coinciden?   " + (arbol1.tamanio() == arbol1.contarNodos()));
+
+        arbol1.eliminar(10);
+        System.out.println("Tras eliminar 10 (9 nodos):");
+        System.out.println("  tamanio()    = " + arbol1.tamanio());
+        System.out.println("  contarNodos()= " + arbol1.contarNodos());
+        System.out.println("  Coinciden?   " + (arbol1.tamanio() == arbol1.contarNodos()));
+
+        ArbolBinarioBusqueda arbolVacio = new ArbolBinarioBusqueda();
+        System.out.println("Arbol vacio:");
+        System.out.println("  contarNodos()= " + arbolVacio.contarNodos());
+
+        // ========================================================
+        // PROBLEMA 2: esBalanceado
+        // ========================================================
+        System.out.println("\n========================================");
+        System.out.println("PROBLEMA 2 — esBalanceado");
+        System.out.println("========================================");
+
+        // Arbol balanceado: 50,30,70,20,40,60,80
+        ArbolBinarioBusqueda arbolBal = new ArbolBinarioBusqueda();
+        for (int v : new int[]{ 50, 30, 70, 20, 40, 60, 80 }) arbolBal.insertar(v);
+        System.out.println("Arbol balanceado (50,30,70,20,40,60,80):");
+        arbolBal.imprimirArbol();
+        System.out.println("esBalanceado()= " + arbolBal.esBalanceado()); // true
+
+        // Arbol desbalanceado: insertar 1,2,3,4,5 en orden (degenerado hacia la derecha)
+        ArbolBinarioBusqueda arbolDesBal = new ArbolBinarioBusqueda();
+        for (int v : new int[]{ 1, 2, 3, 4, 5 }) arbolDesBal.insertar(v);
+        System.out.println("\nArbol desbalanceado (1,2,3,4,5 en orden):");
+        arbolDesBal.imprimirArbol();
+        System.out.println("esBalanceado()= " + arbolDesBal.esBalanceado()); // false
+
+        System.out.println("\nArbol vacio:");
+        System.out.println("esBalanceado()= " + arbolVacio.esBalanceado()); // true
+
+        // ========================================================
+        // PROBLEMA 3: esBSTValido
+        // ========================================================
+        System.out.println("\n========================================");
+        System.out.println("PROBLEMA 3 — esBSTValido");
+        System.out.println("========================================");
+
+        ArbolBinarioBusqueda arbol3 = new ArbolBinarioBusqueda();
+        for (int v : new int[]{ 50, 30, 70, 20, 40, 60, 80, 10 }) arbol3.insertar(v);
+        System.out.println("BST construido correctamente (50,30,70,20,40,60,80,10):");
+        System.out.println("esBSTValido()= " + arbol3.esBSTValido()); // true
+
+        // Arbol "roto": construir estructura invalida modificando nodos directamente
+        // Raiz=50, izquierdo=Nodo(75) <- viola BST (75 > 50 pero esta a la izquierda)
+        Nodo raizRota = new Nodo(50,
+            new Nodo(75,  // INVALIDO: 75 > 50, no puede ir a la izquierda
+                new Nodo(20), new Nodo(80)),
+            new Nodo(70,
+                new Nodo(60), new Nodo(90)));
+        ArbolBinarioBusqueda arbolRoto = new ArbolBinarioBusqueda();
+        // Accedemos directamente al campo raiz via getRaiz() y refactorizamos
+        // con un constructor auxiliar (usamos el paquete):
+        ArbolBinarioBusqueda arbolRoto2 = crearArbolConRaiz(raizRota);
+        System.out.println("\nArbol 'roto' (nodo 75 a la izquierda de 50):");
+        arbolRoto2.imprimirArbol();
+        System.out.println("esBSTValido()= " + arbolRoto2.esBSTValido()); // false
+
+        // ========================================================
+        // PROBLEMA 4: ancestroComunMasBajo (LCA)
+        // ========================================================
+        System.out.println("\n========================================");
+        System.out.println("PROBLEMA 4 — ancestroComunMasBajo (LCA)");
+        System.out.println("========================================");
+
+        ArbolBinarioBusqueda arbol4 = new ArbolBinarioBusqueda();
+        for (int v : new int[]{ 50, 30, 70, 20, 40, 60, 80, 10 }) arbol4.insertar(v);
+        System.out.println("Arbol de referencia:");
+        arbol4.imprimirArbol();
+        System.out.println("LCA(10, 40) = " + arbol4.ancestroComunMasBajo(10, 40) + "  (esperado: 30)");
+        System.out.println("LCA(10, 80) = " + arbol4.ancestroComunMasBajo(10, 80) + "  (esperado: 50)");
+        System.out.println("LCA(60, 80) = " + arbol4.ancestroComunMasBajo(60, 80) + "  (esperado: 70)");
+        System.out.println("LCA(10, 20) = " + arbol4.ancestroComunMasBajo(10, 20) + "  (esperado: 20)");
+        System.out.println("LCA(50, 80) = " + arbol4.ancestroComunMasBajo(50, 80) + "  (esperado: 50)");
+
+        // Prueba con valor inexistente
+        try {
+            arbol4.ancestroComunMasBajo(10, 99);
+        } catch (IllegalArgumentException e) {
+            System.out.println("LCA(10, 99) -> Excepcion correcta: " + e.getMessage());
+        }
+
+        // ========================================================
+        // PROBLEMA 5: invertir (espejo)
+        // ========================================================
+        System.out.println("\n========================================");
+        System.out.println("PROBLEMA 5 — invertir (espejo)");
+        System.out.println("========================================");
+
+        ArbolBinarioBusqueda arbol5 = new ArbolBinarioBusqueda();
+        for (int v : new int[]{ 50, 30, 70, 20, 40, 60, 80, 10 }) arbol5.insertar(v);
+
+        System.out.println("ANTES de invertir:");
+        arbol5.imprimirArbol();
+        System.out.print("InOrden antes (ascendente): ");
+        arbol5.inOrden();
+
+        arbol5.invertir();
+        System.out.println("\nDESPUES de invertir (espejo):");
+        arbol5.imprimirArbol();
+        System.out.print("InOrden despues (descendente): ");
+        arbol5.inOrden();
+
+        // Verificar que un solo nodo tambien funciona
+        ArbolBinarioBusqueda arbolUno = new ArbolBinarioBusqueda();
+        arbolUno.insertar(42);
+        arbolUno.invertir();
+        System.out.print("Arbol de un nodo (42) invertido, inOrden: ");
+        arbolUno.inOrden(); // sigue siendo 42
+    }
+    /**
+     * Metodo auxiliar para crear un ArbolBinarioBusqueda con una raiz personalizada.
+     * Se usa en el Problema 3 para demostrar esBSTValido() con un arbol "roto".
+     * Usa setRaiz() (acceso de paquete) definido en ArbolBinarioBusqueda.
+     */
+    private static ArbolBinarioBusqueda crearArbolConRaiz(Nodo raiz) {
+        ArbolBinarioBusqueda a = new ArbolBinarioBusqueda();
+        a.setRaiz(raiz);
+        return a;
     }
 }
