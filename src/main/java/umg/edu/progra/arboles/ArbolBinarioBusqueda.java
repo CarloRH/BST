@@ -357,6 +357,141 @@ public class ArbolBinarioBusqueda {
     }
 
     // ============================================================
+    // EJERCICIO EXTRA E1: k-esimo menor
+    // ============================================================
+
+    /**
+     * Devuelve el k-esimo valor mas pequenio del arbol (k >= 1).
+     * Estrategia: recorrido InOrden (valores en orden ascendente)
+     * con un contador implementado sin java.util usando un arreglo
+     * de un elemento para simular una referencia mutable.
+     *
+     * @throws IllegalArgumentException si k < 1 o k > tamanio.
+     */
+    public int kEsimoMenor(int k) {
+        if (k < 1 || k > tamanio) {
+            throw new IllegalArgumentException(
+                "k=" + k + " fuera de rango. El arbol tiene " + tamanio + " nodos.");
+        }
+        // contador[0] = cuantos nodos hemos visitado en el inOrden
+        // resultado[0] = valor encontrado
+        int[] contador  = { 0 };
+        int[] resultado = { Integer.MIN_VALUE };
+        kEsimoRecursivo(raiz, k, contador, resultado);
+        return resultado[0];
+    }
+
+    private void kEsimoRecursivo(Nodo nodo, int k, int[] contador, int[] resultado) {
+        if (nodo == null || contador[0] >= k) {
+            return;
+        }
+        kEsimoRecursivo(nodo.izquierdo, k, contador, resultado);
+        contador[0]++;
+        if (contador[0] == k) {
+            resultado[0] = nodo.dato;
+            return;
+        }
+        kEsimoRecursivo(nodo.derecho, k, contador, resultado);
+    }
+
+    // ============================================================
+    // EJERCICIO EXTRA E2: Imprimir rango ordenado
+    // ============================================================
+
+    /**
+     * Imprime en orden ascendente todos los valores en el rango [min, max],
+     * aprovechando la propiedad del BST para no recorrer subaroles
+     * que no puedan contener valores en ese rango.
+     */
+    public void imprimirRangoOrdenado(int min, int max) {
+        imprimirRangoRecursivo(raiz, min, max);
+        System.out.println();
+    }
+
+    private void imprimirRangoRecursivo(Nodo nodo, int min, int max) {
+        if (nodo == null) {
+            return;
+        }
+        // Solo ir a la izquierda si puede haber valores >= min
+        if (nodo.dato > min) {
+            imprimirRangoRecursivo(nodo.izquierdo, min, max);
+        }
+        // Imprimir el nodo actual si esta en el rango
+        if (nodo.dato >= min && nodo.dato <= max) {
+            System.out.print(nodo.dato + " ");
+        }
+        // Solo ir a la derecha si puede haber valores <= max
+        if (nodo.dato < max) {
+            imprimirRangoRecursivo(nodo.derecho, min, max);
+        }
+    }
+
+    // ============================================================
+    // EJERCICIO EXTRA E3: Diametro
+    // ============================================================
+
+    /**
+     * Devuelve el diametro del arbol: el camino mas largo (en aristas)
+     * entre dos nodos cualesquiera. El camino no necesariamente pasa
+     * por la raiz.
+     *
+     * Estrategia: para cada nodo, el diametro que pasa por el es
+     * alturaIzq + alturaDer + 2. Se calcula la altura y el diametro
+     * maximo en un solo recorrido usando un arreglo de un elemento
+     * como referencia mutable.
+     */
+    public int diametro() {
+        if (raiz == null) {
+            return 0;
+        }
+        int[] maxDiametro = { 0 };
+        calcularDiametro(raiz, maxDiametro);
+        return maxDiametro[0];
+    }
+
+    /**
+     * Retorna la altura del nodo y actualiza maxDiametro si el
+     * diametro que pasa por este nodo es mayor.
+     */
+    private int calcularDiametro(Nodo nodo, int[] maxDiametro) {
+        if (nodo == null) {
+            return -1;
+        }
+        int altIzq = calcularDiametro(nodo.izquierdo, maxDiametro);
+        int altDer = calcularDiametro(nodo.derecho, maxDiametro);
+        // Diametro que pasa por este nodo:
+        // (altIzq + 1) aristas hasta la hoja izq + (altDer + 1) aristas hasta la hoja der
+        int diametroLocal = altIzq + altDer + 2;
+        if (diametroLocal > maxDiametro[0]) {
+            maxDiametro[0] = diametroLocal;
+        }
+        return 1 + (altIzq > altDer ? altIzq : altDer);
+    }
+
+    // ============================================================
+    // EJERCICIO EXTRA E4: Construir BST desde args (arreglo int[])
+    // ============================================================
+
+    /**
+     * Construye y devuelve un nuevo BST a partir de un arreglo de enteros.
+     * Pensado para usarse con los argumentos de linea de comandos (args).
+     *
+     * @param valores arreglo de enteros a insertar.
+     * @return nuevo ArbolBinarioBusqueda con los valores insertados.
+     * @throws IllegalArgumentException si el arreglo es null o vacio.
+     */
+    public static ArbolBinarioBusqueda desdeArreglo(int[] valores) {
+        if (valores == null || valores.length == 0) {
+            throw new IllegalArgumentException("El arreglo no puede ser null ni vacio.");
+        }
+        ArbolBinarioBusqueda arbol = new ArbolBinarioBusqueda();
+        for (int v : valores) {
+            arbol.insertar(v);
+        }
+        return arbol;
+    }
+
+    // ============================================================
     // RECORRIDOS DEL ARBOL
     // ============================================================
 
