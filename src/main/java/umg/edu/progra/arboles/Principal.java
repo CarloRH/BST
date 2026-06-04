@@ -219,7 +219,131 @@ public class Principal {
         arbolUno.invertir();
         System.out.print("Arbol de un nodo (42) invertido, inOrden: ");
         arbolUno.inOrden(); // sigue siendo 42
+
+        // ========================================================
+        // EJERCICIO EXTRA E1: kEsimoMenor
+        // ========================================================
+        System.out.println("\n========================================");
+        System.out.println("EXTRA E1 — kEsimoMenor");
+        System.out.println("========================================");
+
+        ArbolBinarioBusqueda arbolE1 = new ArbolBinarioBusqueda();
+        for (int v : new int[]{ 50, 30, 70, 20, 40, 60, 80, 10 }) arbolE1.insertar(v);
+        System.out.print("InOrden: ");
+        arbolE1.inOrden(); // 10 20 30 40 50 60 70 80
+        System.out.println("1er menor: " + arbolE1.kEsimoMenor(1) + "  (esperado: 10)");
+        System.out.println("3er menor: " + arbolE1.kEsimoMenor(3) + "  (esperado: 30)");
+        System.out.println("5to menor: " + arbolE1.kEsimoMenor(5) + "  (esperado: 50)");
+        System.out.println("8vo menor: " + arbolE1.kEsimoMenor(8) + "  (esperado: 80)");
+
+        try {
+            arbolE1.kEsimoMenor(0);
+        } catch (IllegalArgumentException e) {
+            System.out.println("kEsimoMenor(0) -> Excepcion correcta: " + e.getMessage());
+        }
+        try {
+            arbolE1.kEsimoMenor(9);
+        } catch (IllegalArgumentException e) {
+            System.out.println("kEsimoMenor(9) -> Excepcion correcta: " + e.getMessage());
+        }
+
+        // ========================================================
+        // EJERCICIO EXTRA E2: imprimirRangoOrdenado
+        // ========================================================
+        System.out.println("\n========================================");
+        System.out.println("EXTRA E2 — imprimirRangoOrdenado");
+        System.out.println("========================================");
+
+        ArbolBinarioBusqueda arbolE2 = new ArbolBinarioBusqueda();
+        for (int v : new int[]{ 50, 30, 70, 20, 40, 60, 80, 10 }) arbolE2.insertar(v);
+        System.out.print("Rango [20, 60]: ");
+        arbolE2.imprimirRangoOrdenado(20, 60);  // 20 30 40 50 60
+        System.out.print("Rango [1, 25]:  ");
+        arbolE2.imprimirRangoOrdenado(1, 25);   // 10 20
+        System.out.print("Rango [70, 80]: ");
+        arbolE2.imprimirRangoOrdenado(70, 80);  // 70 80
+        System.out.print("Rango [0, 100]: ");
+        arbolE2.imprimirRangoOrdenado(0, 100);  // 10 20 30 40 50 60 70 80
+
+        // ========================================================
+        // EJERCICIO EXTRA E3: diametro
+        // ========================================================
+        System.out.println("\n========================================");
+        System.out.println("EXTRA E3 — diametro");
+        System.out.println("========================================");
+
+        ArbolBinarioBusqueda arbolE3 = new ArbolBinarioBusqueda();
+        for (int v : new int[]{ 50, 30, 70, 20, 40, 60, 80, 10 }) arbolE3.insertar(v);
+        System.out.println("Arbol (50,30,70,20,40,60,80,10):");
+        arbolE3.imprimirArbol();
+        // Camino mas largo: 10->20->30->50->70->80 = 5 aristas
+        System.out.println("Diametro = " + arbolE3.diametro() + "  (esperado: 5)");
+
+        ArbolBinarioBusqueda arbolE3b = new ArbolBinarioBusqueda();
+        for (int v : new int[]{ 1, 2, 3, 4, 5 }) arbolE3b.insertar(v);
+        // Arbol degenerado: 1-2-3-4-5 = 4 aristas
+        System.out.println("Arbol degenerado (1,2,3,4,5):");
+        arbolE3b.imprimirArbol();
+        System.out.println("Diametro = " + arbolE3b.diametro() + "  (esperado: 4)");
+
+        ArbolBinarioBusqueda soloRaiz = new ArbolBinarioBusqueda();
+        soloRaiz.insertar(1);
+        System.out.println("Arbol de un solo nodo, Diametro = " + soloRaiz.diametro() + "  (esperado: 0)");
+
+        // ========================================================
+        // EJERCICIO EXTRA E4: desdeArreglo (construir desde args)
+        // ========================================================
+        System.out.println("\n========================================");
+        System.out.println("EXTRA E4 — desdeArreglo / args");
+        System.out.println("========================================");
+
+        if (args.length > 0) {
+            System.out.println("Argumentos recibidos desde la linea de comandos:");
+            int[] argsInt = new int[args.length];
+            boolean validos = true;
+            for (int i = 0; i < args.length; i++) {
+                try {
+                    argsInt[i] = Integer.parseInt(args[i]);
+                    System.out.print(argsInt[i] + " ");
+                } catch (NumberFormatException e) {
+                    System.out.println("\nError: '" + args[i] + "' no es un entero valido.");
+                    validos = false;
+                    break;
+                }
+            }
+            if (validos) {
+                System.out.println();
+                ArbolBinarioBusqueda arbolArgs = ArbolBinarioBusqueda.desdeArreglo(argsInt);
+                System.out.println("BST construido desde args:");
+                arbolArgs.imprimirArbol();
+                System.out.print("InOrden (ascendente): ");
+                arbolArgs.inOrden();
+                System.out.println("Tamanio:  " + arbolArgs.tamanio());
+                System.out.println("Altura:   " + arbolArgs.altura());
+                System.out.println("Minimo:   " + arbolArgs.minimo());
+                System.out.println("Maximo:   " + arbolArgs.maximo());
+                System.out.println("Balanceado: " + arbolArgs.esBalanceado());
+                System.out.println("BST valido: " + arbolArgs.esBSTValido());
+            }
+        } else {
+            // Sin argumentos: demo con arreglo fijo
+            System.out.println("(Sin args de consola — demo con arreglo fijo: 15,9,25,4,12,20,30)");
+            int[] arregloDemo = { 15, 9, 25, 4, 12, 20, 30 };
+            ArbolBinarioBusqueda arbolDemo = ArbolBinarioBusqueda.desdeArreglo(arregloDemo);
+            System.out.println("BST construido desde arreglo:");
+            arbolDemo.imprimirArbol();
+            System.out.print("InOrden (ascendente): ");
+            arbolDemo.inOrden();
+            System.out.println("Tamanio:    " + arbolDemo.tamanio());
+            System.out.println("Altura:     " + arbolDemo.altura());
+            System.out.println("Balanceado: " + arbolDemo.esBalanceado());
+            System.out.println("BST valido: " + arbolDemo.esBSTValido());
+            System.out.println("Diametro:   " + arbolDemo.diametro());
+        }
+
+        System.out.println("\n===== FIN DE LA DEMOSTRACION =====");
     }
+
     /**
      * Metodo auxiliar para crear un ArbolBinarioBusqueda con una raiz personalizada.
      * Se usa en el Problema 3 para demostrar esBSTValido() con un arbol "roto".
